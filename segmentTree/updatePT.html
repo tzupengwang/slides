@@ -1,0 +1,12 @@
+<pre><code data-trim contenteditable>
+void update( node *now , int pos , int val ) {
+  if ( now->l == now->r ) {
+	now->sum = val ;
+	return ;
+  }
+  int mid = ( now->l + now->r ) >> 1 ;
+  if ( pos <= mid ) update( now->l , pos , val ) ;
+  else update( now->r , pos , val ) ;
+  now->sum = now->lc->sum + now->rc->sum ;
+}
+</code></pre>

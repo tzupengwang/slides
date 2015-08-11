@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+	<meta charset="utf-8">
+
+	<title>Segment Tree</title>
+
+	<meta name="description" content="A Introduction to Segment Tree">
+	<meta name="author" content="Paul Wang">
+
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+	<link rel="stylesheet" href="css/reveal.css">
+	<link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+	<!-- Code syntax highlighting -->
+	<link rel="stylesheet" href="lib/css/zenburn.css">
+
+	<!-- Printing and PDF exports -->
+	<script>
+	  var link = document.createElement( 'link' );
+	  link.rel = 'stylesheet';
+	  link.type = 'text/css';
+	  link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+	  document.getElementsByTagName( 'head' )[0].appendChild( link );
+	</script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script>
+		$(function(){
+      s = [ "initPT" , "updatePT" , "queryPT" , "discretization" , "discretization2" , "tree" ] ;
+      for ( var i = 0 ; i < s.length ; i ++ )
+  		  $("#includedContent_"+s[i]).load(s[i]+".html");
+		});
+	</script>
+
+	<!--[if lt IE 9]>
+	<script src="lib/js/html5shiv.js"></script>
+	<![endif]-->
+  </head>
+
+  <body>
+
+	<div class="reveal">
+
+	  <!-- Any section element inside of this container is displayed as a slide -->
+	  <div class="slides">
+		<section>
+		  <h1>Segment Tree</h1>
+		</section>
+
+		<section>
+		  <section>
+			<h2>Why Segment Tree</h2>
+		  </section>
+		  <section>
+			<h2>Problem 1</h2>
+			<ul>
+			  <li class="fragment">給一個長度$n (n \leq 10^5)$的數列</li>
+			  <li class="fragment">修改第$k$個數</li>
+			  <li class="fragment">詢問區間$[l,r]$的最大值</li>
+			</ul>
+		  </section>
+		  <section>
+			<h2>樸素算法</h2>
+			<ul>
+			  <li class="fragment">修改：$O(1)$</li>
+			  <li class="fragment">詢問：$O(n)$</li>
+			</ul>
+		  </section>
+		  <section>
+			<h2>樸素算法2</h2>
+			<ul>
+			  <li class="fragment">修改：$O(n^2)$</li>
+			  <li class="fragment">詢問：$O(1)$</li>
+			</ul>
+		  </section>
+		  <section>
+			<h2>線段樹算法</h2>
+			<ul>
+			  <li class="fragment">修改：$O(log_{2}n)$</li>
+			  <li class="fragment">詢問：$O(log_{2}n)$</li>
+        <li class="fragment"><a href="#/4/15">back</a></li>
+			</ul>
+		  </section>
+		  <section>
+			<h2>Problem 2</h2>
+			<ul>
+			  <li>給一個$n (n \leq 10^5)$個節點的有根樹</li>
+			  <li>修改節點$k$上的值</li>
+			  <li>詢問從節點$k$走到根所經過的節點上的值的總和</li>
+			</ul>
+		  </section>
+		  <section>
+			<h2>樸素算法</h2>
+			<ul>
+			  <li class="fragment">修改：$O(1)$</li>
+			  <li class="fragment">詢問：$O(n)$</li>
+			</ul>
+		  </section>
+		  <section>
+			<h2>樸素算法2</h2>
+			<ul>
+			  <li class="fragment">修改：$O(n)$</li>
+			  <li class="fragment">詢問：$O(1)$</li>
+			</ul>
+		  </section>
+		</section>
+		<section>
+		  <section>
+			<h2>What is Segment Tree</h2>
+			<ul>
+			  <li class="fragment">有根二元樹</li>
+			  <li class="fragment">每個節點紀錄一個區間的某些<br>性質</li>
+			  <li class="fragment">子結點所代表的區間是當前節<br>點的子區間</li>
+			  <li class="fragment"><s>很強大</s></li>
+			</ul>
+		  </section>
+		  <section>
+			<h2>Example (n=10)</h2>
+			<img src="./images/segment_Tree.png" style="width:560px;height:300px">
+		  </section>
+		  <section>
+			<h2>可以維護什麼？</h2>
+			<ul>
+			  <li class="fragment">各種可分治的特性</li>
+			  <li class="fragment">Ex:最大/小值、和、乘積、GCD...</li>
+			</ul>
+		  </section>
+		</section>
+		<section>
+		  <section>
+			<h1>Implementation</h1>
+		  </section>
+		  <section>
+			<h2>二元樹的實作</h2>
+			<ul>
+			  <li class="fragment">指標好好做</li>
+			  <li class="fragment">陣列模擬</li>
+			</ul>
+		  </section>
+		  <section>
+			<h2>陣列模擬二元樹<br>(1-base)</h2>
+			<ul>
+			  <li class="fragment">對於節點$n$，左節點編號$2n$，右節點編號$2n+1$</li>
+			  <ul>
+				<center><img class="fragment" src="./images/binary_tree.png" style="width:440px;height:250px"></center>
+			  </section>
+			  <section>
+				<h2>Code 實作<br>(區間sum)</h2>
+			  </section>
+			  <section>
+				<h2>init</h2>
+				<pre><code data-trim contenteditable>
+int st[ MAXN * 4 ] ;
+void init( int id , int l , int r ) {
+  if ( l == r ) {
+  	// initialize leaf nodes
+  	st[ id ] = 0 ;
+  	return ;
+  }
+  int mid = ( l + r ) >> 1 ;
+  init( id * 2 , l , mid ) ;
+  init( id * 2 + 1 , mid + 1 , r ) ;
+  // initialize other nodes
+  st[ id ] = st[ id * 2 ] + st[ id * 2 + 1 ] ;
+}
+			</code></pre>
+			  </section>
+			  <section>
+				<h2>update</h2>
+				<pre><code data-trim contenteditable>
+void update( int id , int l , int r , int pos , int val ) {
+  if ( l == r ) {
+  	// update "pos" ( note: pos = l = r )
+  	st[ id ] = val ;
+  	return ;
+  }
+  int mid = ( l + r ) >> 1 ;
+  if ( pos <= mid ) update( id * 2 , l , mid , pos , val ) ;
+  else update( id * 2 + 1 , mid + 1 , r , pos , val ) ;
+  // update other nodes
+  st[ id ] = st[ id * 2 ] + st[ id * 2 + 1 ] ;
+}
+				</code></pre>
+			  </section>
+			  <section>
+				<h2>query</h2>
+				<pre><code data-trim contenteditable>
+int query( int id , int l , int r , int L , int R ) {
+  if ( L <= l && r <= R ) return st[ id ] ;
+  if ( l > R || r < L ) return 0 ;
+
+  int mid = ( l + r ) >> 1 ;
+  return query( id * 2 , l , mid , L , R ) +
+	query( id * 2 + 1 , mid + 1 , r , L , R ) ;
+}
+				</code></pre>
+			  </section>
+			  <section>
+				<h2>update a to b</h2>
+				<pre><code data-trim contenteditable>
+update( 1 , 0 , n - 1 , a , b ) ;
+				</code></pre>
+				<h2>query sum from a to b</h2>
+				<pre><code data-trim contenteditable>
+query( 1 , 0 , n - 1 , a , b ) ;
+				</code></pre>
+			  </section>
+			  <section>
+				<h2>Practice</h2>
+				<ul><li><h3>TOJ-80</h3></li></ul>
+			  </section>
+			  <section>
+				<h2>指標寫法</h2>
+				<pre><code data-trim contenteditable>
+struct node {
+  node *lc , *rc ;
+  int l , r , sum ;
+  node() {}
+  node( int L , int R ) : l( L ) , r( R ) {}
+} *root ;
+				</code></pre>
+			  </section>
+			  <section>
+  				<h2>init</h2>
+    			<div id="includedContent_initPT"></div>
+  			</section>
+  			<section>
+  			  <h2>update</h2>
+    			<div id="includedContent_updatePT"></div>
+  		  </section>
+  		  <section>
+    			<h2>query</h2>
+    			<div id="includedContent_queryPT"></div>
+  		  </section>
+  		</section>
+  		<section>
+        <section>
+          <h1>各種複雜度</h1>
+        </section>
+        <section>
+          <h2>線段樹深度</h2>
+          <ul>
+            <li class="fragment">令根為第$1$層</li>
+            <li class="fragment">第$K$層的區間大小不超過$\frac{N}{2^{K-2}}$</li>
+            <li class="fragment">葉節點所在層數不超過$\lfloor log_{2} N \rfloor + 2$</li>
+            <li class="fragment">$O(log_{2} N)$</li>
+          </ul>
+        </section>
+        <section>
+          <h2>N=14</h2>
+          <img src="./images/14.jpg" style="width:800px">
+        </section>
+        <section>
+          <h2>單點修改</h2>
+          <ul>
+            <li class="fragment">$O(深度)=O(log_{2} N)$</li>
+          </ul>
+        </section>
+        <section>
+          <h2>update(5)</h2>
+          <img src="./images/14-2.jpg" style="width:800px">
+        </section>
+        <section>
+          <h2>區間查詢</h2>
+          <p class="fragment">一個小觀察<br>終止條件的區間有兩種</p>
+          <ul>
+            <li class="fragment">與$[L,R]$互斥</li>
+            <li class="fragment">包含於$[L,R]$</li>
+          </ul>
+        </section>
+        <section>
+          <h2>包含於$[L,R]$</h2>
+          <ul>
+            <li class="fragment">屬於同一層的區間不超過兩個(反證)</li>
+            <li class="fragment">$O(2 \times log_{2}N)=O(log_{2}N)$</li>
+          </ul>
+        </section>
+        <section>
+          <h2>query(4,13)</h2>
+          <img src="./images/14-3.jpg" style="width:800px">
+        </section>
+        <section>
+          <h2>與$[L,R]$互斥</h2>
+          <ul>
+            <li class="fragment">相當於查詢$[1,L-1]$以及$[R+1,N]$時完全包含的區間</li>
+            <li class="fragment">$O(log_{2}N)$</li>
+          </ul>
+        </section>
+        <section>
+          <h2>query(4,13)</h2>
+          <img src="./images/14-4.jpg" style="width:800px">
+        </section>
+        <section>
+          <h2>最後的小觀察</h2>
+          <ul>
+            <li class="fragment">所有走過的節點形成一棵完滿的二元樹</li>
+            <li class="fragment">葉節點為終止條件的區間</li>
+          </ul>
+        </section>
+        <section>
+          <h2>query(4,13)</h2>
+          <img src="./images/14-5.jpg" style="width:800px">
+        </section>
+        <section>
+          <h2>完滿二元樹</h2>
+          <ul>
+            <li class="fragment">每個節點有$0$或$2$個子結點</li>
+            <li class="fragment">葉節點個數$=$其他節點個數$+1$</li>
+          </ul>
+        </section>
+        <section>
+          <p style="font-size:80px">$O(log_{2}N)$</p>
+        </section>
+        <section>
+          <h2>初始化(建樹)</h2>
+          <ul>
+            <li class="fragment">整棵樹也是個完滿二元樹</li>
+            <li class="fragment">葉節點個數$=N$</li>
+            <li class="fragment">$O(N)$</li>
+          </ul>
+        </section>
+        <section>
+          <h2>複雜度的取捨</h2>
+          <ul>
+            <li class="fragment"><a href="#/1/1">Example</a></li>
+          </ul>
+        </section>
+  		</section>
+      <section>
+        <section>
+          <h1>Useful Techniques</h1>
+        </section>
+        <section>
+          <h2>Example 1</h2>
+          <ul>
+            <li class="fragment">一面長$10^9$的牆</li>
+            <li class="fragment">貼一張海報在$[x_i,x_i+1]$</li>
+            <li class="fragment">查詢一個區間$[L,R]$中有幾張海報</li>
+            <li class="fragment">總操作數$\leq 10^5$</li>
+          </ul>
+        </section>
+        <section>
+          <h2>naive</h2>
+          <ul>
+            <li class="fragment">$\texttt{int st[ 4000000005 ] ;}$</li>
+          </ul>
+          <p class="fragment" style="font-size:200px;color:red">MLE</p>
+        </section>
+        <section>
+          <h2>離散化</h2>
+          <ul>
+            <li class="fragment">觀察：大部分的點都是空的(不重要)</li>
+            <li class="fragment">捨棄他們</li>
+            <li class="fragment">重新編號</li>
+          </ul>
+        </section>
+        <section>
+          <h2>discretization</h2>
+    			<div id="includedContent_discretization"></div>
+        </section>
+        <section>
+          <h2>discretization (alternative)</h2>
+    			<div id="includedContent_discretization2"></div>
+        </section>
+        <section>
+          <h2>Example 2</h2>
+          <ul>
+            <li class="fragment">一棵$10^5$個點的有根樹</li>
+            <li class="fragment">修改一個節點的權重</li>
+            <li class="fragment">查詢一棵子樹的權重和</li>
+            <li class="fragment">總操作數$\leq 10^5$</li>
+          </ul>
+        </section>
+        <section>
+          <h2>naive</h2>
+    			<ul>
+    			  <li class="fragment">修改：$O(1)$</li>
+    			  <li class="fragment">詢問：$O(n)$</li>
+    			</ul>
+          <p class="fragment" style="font-size:200px;color:red">TLE</p>
+        </section>
+        <section>
+          <h2>樹 vs 區間</h2>
+          <ul>
+            <li class="fragment">一顆子樹</li>
+            <li class="fragment">一個區間</li>
+            <li class="fragment">看起來有點像(?)</li>
+          </ul>
+        </section>
+        <section>
+          <h2>把樹壓平</h2>
+          <ul>
+            <li class="fragment">節點照前序走訪順序編號</li>
+            <li class="fragment">一個子樹變成一個區間</li>
+          </ul>
+        </section>
+        <section>
+          <img src="./images/tree.png" style="width:500px">
+        </section>
+        <section>
+          <h2>Time Stamp</h2>
+    			<div id="includedContent_tree"></div>
+        </section>
+			  <section>
+  				<h2>update a to b</h2>
+  				<pre><code data-trim contenteditable>
+update( 1 , 0 , n - 1 , in[ a ] , b ) ;
+  				</code></pre>
+  				<h2>query sum of subtree a</h2>
+  				<pre><code data-trim contenteditable>
+query( 1 , 0 , n - 1 , in[ a ] , out[ a ] ) ;
+  				</code></pre>
+			  </section>
+      </section>
+      <section>
+        <section>
+          <h1>區間修改？</h1>
+        </section>
+        <section>
+          <h2>大家都修改一次？</h2>
+          <h1 class="fragment" style="color:red;font-size:150px">TLE</h1>
+        </section>
+        <section>
+          <h1>區間查詢？</h1>
+        </section>
+        <section>
+          <h2>query(4,13)</h2>
+          <img src="./images/14-3.jpg" style="width:1000px">
+        </section>
+        <section>
+          <h2>update(4,13)?</h2>
+          <img src="./images/14-3.jpg" style="width:1000px">
+        </section>
+        <section>
+          <h1>Lazy Tag</h1>
+        </section>
+        <section>
+          <h2>Properties</h2>
+          <ul>
+            <li class="fragment">若存在祖先的$tag \neq 0$，樹上的資訊可以是錯的</li>
+            <li class="fragment">反之，資訊必須是正確的</li>
+            <li class="fragment">若存在$tag \neq 0$，必須能從$tag$中的資訊以及子結<br>點的資訊求出子結點的正確資訊</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Implementation</h2>
+          <ul>
+            <li class="fragment">遇到$tag \neq 0$就往下丟</li>
+            <li class="fragment">遇到$tag \neq 0$就往下丟</li>
+            <li class="fragment">遇到$tag \neq 0$就往下丟</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Example(區間Sum)</h2>
+        </section>
+			  <section>
+  				<h2>init</h2>
+  				<pre><code data-trim contenteditable>
+int st[ MAXN * 4 ] , tag[ MAXN * 4 ];
+void init( int id , int l , int r ) {
+  if ( l == r ) {
+  	// initialize leaf nodes
+  	st[ id ] = tag[ id ] = 0 ;
+  	return ;
+  }
+  int mid = ( l + r ) >> 1 ;
+  init( id * 2 , l , mid ) ;
+  init( id * 2 + 1 , mid + 1 , r ) ;
+  // initialize other nodes
+  st[ id ] = st[ id * 2 ] + st[ id * 2 + 1 ] ;
+  tag[ id ] = 0 ;
+}
+    			</code></pre>
+			  </section>
+			  <section>
+  				<h2>throwdown</h2>
+  				<pre><code data-trim contenteditable>
+void throwdown( int id , int l , int r ) {
+  if ( l == r ) return ;
+  int mid = ( l + r ) >> 1 ;
+  tag[ id * 2 ] = tag[ id * 2 + 1 ] = tag[ id ] ;
+  tag[ id ] = 0 ;
+  st[ id * 2 ] = ( mid - l + 1 ) * tag[ id * 2 ] ;
+  st[ id * 2 + 1 ] = ( r - mid ) * tag[ id * 2 + 1 ] ;
+  st[ id ] = st[ id * 2 ] + st[ id * 2 + 1 ] ;
+}
+  				</code></pre>
+			  </section>
+			  <section>
+  				<h2>update</h2>
+  				<pre><code data-trim contenteditable>
+void update( int id , int l , int r , int L , int R , int val ) {
+  if ( L <= l && r <= R ) {
+    st[ id ] = ( r - l + 1 ) * val ;
+    tag[ id ] = val ;
+    return ;
+  }
+  if ( l > R || r < L ) return ;
+
+  if ( tag[ id ] != 0 ) throwdown( id , l , r ) ;
+  int mid = ( l + r ) >> 1 ;
+  update( id * 2 , l , mid , pos , val ) ;
+  update( id * 2 + 1 , mid + 1 , r , pos , val ) ;
+  // update other nodes
+  st[ id ] = st[ id * 2 ] + st[ id * 2 + 1 ] ;
+}
+  				</code></pre>
+			  </section>
+			  <section>
+  				<h2>query</h2>
+  				<pre><code data-trim contenteditable>
+int query( int id , int l , int r , int L , int R ) {
+  if ( L <= l && r <= R ) return st[ id ] ;
+  if ( l > R || r < L ) return 0 ;
+
+  if ( tag[ id ] != 0 ) throwdown( id , l , r ) ;
+  int mid = ( l + r ) >> 1 ;
+  return query( id * 2 , l , mid , L , R ) +
+  	query( id * 2 + 1 , mid + 1 , r , L , R ) ;
+}
+  				</code></pre>
+			  </section>
+			  <section>
+  				<h2>update [ a , b ] to c</h2>
+  				<pre><code data-trim contenteditable>
+update( 1 , 0 , n - 1 , a , b , c ) ;
+  				</code></pre>
+  				<h2>query sum from a to b</h2>
+  				<pre><code data-trim contenteditable>
+query( 1 , 0 , n - 1 , a , b ) ;
+  				</code></pre>
+			  </section>
+      </section>
+      <section>
+        <section>
+          <h1>各種應用</h1>
+        </section>
+        <section>
+          <h2>Problem 1 (IOI2014)</h2>
+          <ul>
+            <li>一個長$2 \times 10^6$的牆壁 (高度初始為零)</li>
+            <li>把一個區間$[l_i,r_i]$中不到$h_i$的牆蓋到$h_i$</li>
+            <li>把一個區間$[l_i,r_i]$中超過$h_i$的牆拆到$h_i$</li>
+            <li>$5 \times 10^5$次操作，最後輸出牆壁的長相</li>
+          </ul>
+        </section>
+        <section>
+          <h1>區間修改</h1>
+          <h2 class="fragment">$\downarrow$</h2>
+          <h1 class="fragment">懶標記</h1>
+        </section>
+        <section>
+          <h1>維護什麼？</h1>
+        </section>
+        <section>
+          <h1>需要什麼樣的查詢？</h1>
+          <ul>
+            <li class="fragment">只需要單點查詢高度!!!!!</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Solution</h2>
+          <ul>
+            <li class="fragment">每個區間維護兩個tag值</li>
+            <li class="fragment">必須小於等於多少?</li>
+            <li class="fragment">必須大於等於多少?</li>
+            <li class="fragment">tag有前後順序之分</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Tag的合併</h2>
+          <ul>
+            <li class="fragment">原來：$\leq a$，新增：$\leq b$</li>
+            <li class="fragment">$if a \leq b$，忽略他</li>
+            <li class="fragment">$if a \geq b$，tag改成$\leq b$</li>
+            <li class="fragment">以此類推</li>
+          </ul>
+        </section>
+        <section>
+          <h1 style="font-size:150px;color:green">AC</h1>
+        </section>
+      </section>
+      <section>
+        <section>
+          <h2>Problem 2 (GCJ2013)</h2>
+          <ul>
+            <li class="fragment">一個很長很長的萬里長城 (高度初始為零)</li>
+            <li class="fragment">把一個區間$[l_i,r_i]$中不到$h_i$的牆蓋到$h_i$嗎？</li>
+            <li class="fragment"><a href="https://code.google.com/codejam/contest/2437488/dashboard#s=p2">Problem statement</a></li>
+          </ul>
+        </section>
+        <section>
+          <h1>範圍？</h1>
+          <ul>
+            <li class="fragment">$10^5$？</li>
+            <li class="fragment">$10^9$？</li>
+            <li class="fragment">離散化</li>
+          </ul>
+        </section>
+        <section>
+          <h2>要支援什麼操作？</h2>
+          <ul>
+            <li class="fragment">區間查詢最小值</li>
+            <li class="fragment">區間修改成大於等於某個值</li>
+          </ul>
+        </section>
+        <section>
+          <h2>維護什麼？</h2>
+          <ul>
+            <li class="fragment">區間最小值</li>
+            <li class="fragment">懶標記：區間內的數需大於等於他</li>
+          </ul>
+        </section>
+        <section>
+          <h1 style="font-size:150px;color:green">AC</h1>
+        </section>
+      </section>
+      <section>
+        <section>
+          <h2>Problem 3 (逆序數對)</h2>
+          <ul>
+            <li class="fragment">一個長$10^5$的數列</li>
+            <li class="fragment">問逆序數對個數</li>
+          </ul>
+        </section>
+        <section>
+          <h1>作法一</h1>
+          <h2 class="fragment">Merge Sort</h2>
+        </section>
+        <section>
+          <h1 style="font-size:150px;color:green">AC</h1>
+        </section>
+        <section>
+          <h1>作法二</h1>
+          <ul>
+            <li class="fragment">等價於問"對每個數，前面有幾個數比他大"</li>
+            <li class="fragment">掃描線+線段樹</li>
+          </ul>
+        </section>
+        <section>
+          <h2>掃描線概念</h2>
+          <ul>
+            <li class="fragment">依序新增資料</li>
+            <li class="fragment">可以去查詢目前為止的某個資訊</li>
+          </ul>
+        </section>
+        <section>
+          <h2>實作</h2>
+          <ul>
+            <li class="fragment">資料離散化後當線段樹的index</li>
+            <li class="fragment">依數列的順序一個一個加入</li>
+            <li class="fragment">先查詢大於他的數有幾個</li>
+            <li class="fragment">再在線段樹上對應的位置加一</li>
+          </ul>
+        </section>
+        <section>
+          <h1 style="font-size:150px;color:green">AC</h1>
+        </section>
+        <section>
+          <h2>作法三</h2>
+          <ul>
+            <li class="fragment">要維護的東西BIT也做得到</li>
+            <li class="fragment">用BIT取代線段樹</li>
+          </ul>
+        </section>
+        <section>
+          <h1 style="font-size:150px;color:green">AC</h1>
+        </section>
+      </section>
+      <section>
+        <section>
+          <h2>Problem 4</h2>
+          <ul>
+            <li class="fragment">一個商品清單(初始為空)</li>
+            <li class="fragment">商品有編號跟價值</li>
+            <li class="fragment">新增或刪除某個商品</li>
+            <li class="fragment">詢問最少要買幾個可以得到價值和$\geq V$</li>
+          </ul>
+        </section>
+        <section>
+          <h2>觀察</h2>
+          <ul>
+            <li class="fragment">取大的一定比較好</li>
+            <li class="fragment">排序後重新編號</li>
+          </ul>
+        </section>
+        <section>
+          <h1>線段樹上二分搜</h1>
+          <ul>
+            <li class="fragment">線段樹上維護兩個東西</li>
+            <li class="fragment">數量 和 價值和</li>
+            <li class="fragment">每次二分搜出至少到哪裡的價值前綴和$\geq V$</li>
+          </ul>
+        </section>
+        <section>
+          <h2>$O(N log^2 N)$</h2>
+        </section>
+        <section>
+          <h1 style="font-size:150px;color:green">AC</h1>
+        </section>
+      </section>
+      <section>
+        <section>
+          <h1>離線</h1>
+          <h3>v.s.</h3>
+          <h1>在線</h1>
+        </section>
+        <section>
+          <ul>
+            <li>在線：對每一個詢問即時回答</li>
+            <li>離線：知道所有詢問後一起回答</li>
+          </ul>
+        </section>
+        <section>
+          <h2>離線的好處</h2>
+          <ul>
+            <li>讓你對詢問多做一些方便的處理<br>Ex: 離散化、排序</li>
+            <li>可以均攤複雜度(讓爛作法變好?)</li>
+          </ul>
+        </section>
+      </section>
+      <section>
+        <section>
+          <h1>延伸閱讀？</h1>
+          <h2>樹套樹(二維線段樹)</h2>
+        </section>
+        <section>
+          <h1>下週課程預告</h1>
+          <h2>各種字串算法</h2>
+        </section>
+      </section>
+  		</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+		  // Full list of configuration options available at:
+		// https://github.com/hakimel/reveal.js#configuration
+		Reveal.initialize({
+		  controls: true,
+		  progress: true,
+		  history: true,
+		  center: true,
+
+		  transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+		  // Optional reveal.js plugins
+		  dependencies: [
+			{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+			{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+			{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+			{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+			{ src: 'plugin/zoom-js/zoom.js', async: true },
+			{ src: 'plugin/notes/notes.js', async: true },
+			{ src: 'plugin/math/math.js', async: true }
+		  ]
+		});
+
+		</script>
+
+	  </body>
+	</html>

@@ -1,0 +1,16 @@
+<pre><code data-trim contenteditable>
+void init( node *now ) {
+  if ( now->l == now->r ) {
+	// initialize leaf nodes
+	now->sum = 0 ;
+	return ;
+  }
+  int mid = ( now->l + now->r ) >> 1 ;
+  now->lc = new node( now->l , mid ) ;
+  now->rc = new node( mid + 1 , now->r ) ;
+  init( now->lc ) ;
+  init( now->rc ) ;
+  // initialize other nodes
+  now->sum = now->lc->sum + now->rc->sum ;
+}
+</code></pre>

@@ -1,0 +1,23 @@
+<pre><code data-trim contenteditable style="width:900px">
+struct tmp {
+	int val , id ;
+	tmp() {}
+	tmp( int a , int b ) : val( a ) , id( b ) {}
+	bool operator<( const tmp &a ) const {
+		return val < a.val ;
+	}
+} v[ 10 ] ;
+
+void discretization( ) {
+	for ( int i = 0 ; i < n ; i ++ )
+		v[ i ] = tmp( s[ i ] , i ) ;
+	sort( v , v + n ) ;
+	int cnt = 0 , last = v[ 0 ].val ;
+	for ( int i = 0 ; i < n ; i ++ ) {
+		if ( v[ i ].val == last ) s[ v[ i ].id ] = cnt ;
+		else s[ v[ i ].id ] = ++ cnt ;
+		last = v[ i ].val ;
+	}
+	for ( int i = 0 ; i < n ; i ++ ) cout << s[ i ] << endl ;
+}
+</code></pre>

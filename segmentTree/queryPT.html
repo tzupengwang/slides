@@ -1,0 +1,10 @@
+<pre><code data-trim contenteditable>
+int query( node *now , int L , int R ) {
+  if ( L <= now->l && now->r <= R ) return now->sum ;
+  if ( L > now->r || R < now->l ) return 0 ;
+  int mid = ( now->l + now->r ) >> 1 ;
+  return query( now->l , L , R ) +
+	query( now->r , L , R ) ;
+}
+</code></pre>
+
