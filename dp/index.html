@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+
+	<title>Dynamic Programming</title>
+
+	<meta name="description" content="Dynamic Programming - IOICamp2016">
+	<meta name="author" content="Paul Wang">
+
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+	<link rel="stylesheet" href="css/reveal.css">
+	<link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+	<!-- Code syntax highlighting -->
+	<link rel="stylesheet" href="lib/css/zenburn.css">
+
+	<!-- Printing and PDF exports -->
+	<script>
+		var link = document.createElement( 'link' );
+		link.rel = 'stylesheet';
+		link.type = 'text/css';
+		link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+		document.getElementsByTagName( 'head' )[0].appendChild( link );
+	</script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script>
+		$(function(){
+			//s = [ "bookshelf_1D_2D", "DAG_data", "DAG_top_down", "DAG_bottom_up" , "bounded_max_subseq", "commando", "commando2"] ;
+			//for ( var i = 0 ; i < s.length ; i ++ )
+			//	$("#includedContent_"+s[i]).load(s[i]+".html");
+
+			Reveal.initialize({
+				controls: true,
+				slideNumber: true,
+				progress: true,
+				history: true,
+				center: true,
+
+	  transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+	  // Optional reveal.js plugins
+	  dependencies: [
+	  { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+	  { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+	  { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+	  { src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+	  { src: 'plugin/zoom-js/zoom.js', async: true },
+	  { src: 'plugin/notes/notes.js', async: true },
+	  { src: 'plugin/math/math.js', async: true }
+	  ]});
+		})
+</script>
+
+	<!--[if lt IE 9]>
+	<script src="lib/js/html5shiv.js"></script>
+	<![endif]-->
+</head>
+
+<body>
+
+	<div class="reveal">
+
+		<!-- Any section element inside of this container is displayed as a slide -->
+		<div class="slides">
+			<section>
+				<section>
+					<h1>動態規劃</h1>
+					<p>IOICamp 2016<p>
+				</section>
+				<section>
+					<h2>我是誰？</h2>
+					<ul>
+						<li>王子朋 Paul Wang</li>
+						<li>台大電機二（資工二？）</li>
+						<li>IOI2014 銀牌</li>
+						<li>一些區域賽</li>
+						<li>id: tzupengwang</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Course Outline</h2>
+					<ul>
+						<li>動態規劃入門</li>
+						<li>狀態以及轉移方程</li>
+						<li>Top-down vs. Bottom-up</li>
+						<li>常見小技巧</li>
+						<li>單調性優化</li>
+					</ul>
+				</section>
+			</section>
+
+			<section>
+				<section>
+					<h2>動態規劃入門</h2>
+					<ul>
+						<li>What is DP?</li>
+						<li>Why DP?</li>
+						<li>When to DP?</li>
+					</ul>
+				</section>
+				<section>
+					<h2>What is DP?</h2>
+					<p class="fragment">一種解決問題的「模式」，<br/>用來解決「最佳化問題」和「計數問題」</p>
+				</section>
+				<section>
+					<h2>DP outline</h2>
+					<ul>
+						<li class="fragment">拆解原先的問題</li>
+						<li class="fragment">解決每個小問題<font class="fragment" style="font-weight:bold; color:red">一次</font></li>
+						<li class="fragment">解決原先的問題</li>
+					</ul>
+				</section>
+				<section>
+					<h2>用<font style="color:red">空間</font>換取<font style="color:red">時間</font></h2>
+				</section>
+				<section>
+					<h2>Why DP?</h2>
+				</section>
+				<section>
+					<h3>比較快</h3>
+				</section>
+				<section>
+					<h2>例題：0/1 背包問題</h2>
+					<p style="text-align:left">假設我們有一個總容量為 $V$ 單位的背包 ($V \leq 5,000$)，可以用來放各種物品，且只要物品的總容量不要超過 $V$ ，就保證可以放得進此背包。<br/>
+						現在總共有 $N$ ($N \leq 1,000$) 個物品，每個物品 $I_i$ 有其佔的體積 $d_i$ 及價值 $c_i$ ($0 \leq d_i, c_i \leq 1,000$)，每項物品都只有一個，問最多可以放價值總和多少的物品在這個背包內？</p>
+					</section>
+					<section>
+						<h2>直接枚舉</h2>
+						<h2 class="fragment">$\downarrow$</h2>
+						<h2 class="fragment">$O(2^N)$</h2>
+					</section>
+					<section>
+						<h2>觀察</h2>
+						<p class="fragment">原先的問題：$V\, + \,(\Gamma = \{I_1, I_2, \ldots, I_N\})$</p>
+						<p class="fragment" style="color:red">拿了$I_k$後</p>
+						<p class="fragment">剩餘的問題：$V - d_k\, + \,(\Gamma' = \{I_1, I_2, \ldots, I_N\} \setminus {I_k})$</p>
+					</section>
+					<section>
+						<p>$K(V, \Gamma) = \max \Big( K(V-d_k,\Gamma') + c_k , K(V,\Gamma') \Big)$</p>
+					</section>
+					<section>
+						<h2>動態規劃算法</h2>
+						<ul>
+							<li class="fragment">$O(VN)$種問題</li>
+							<li class="fragment">每一個$O(1)$處理</li>
+							<li class="fragment">總複雜度：$O(VN)$</li>
+						</ul>
+						<h3 class="fragment"><br/>結論：DP is awesome!!!!</h3>
+					</section>
+					<section>
+						<h2>When to DP?</h2>
+					</section>
+					<section>
+						<h2>必要條件</h2>
+						<ul>
+							<li>最佳子結構 (optimal substructure)</li>
+							<li>重複子問題 (overlapping subproblems)</li>
+						</ul>
+					</section>
+					<section>
+						<h2>例題：DAG上的最長路徑</h2>
+						<p style="text-align:left">給定一張有向無環圖(Directed Acyclic Graph, DAG)其中有 $N$ 個節點， $M$ 條有向邊，每條邊又有其邊權。
+							其中有一個可以走到所有點的源點 $S$ ，請問：對於每一個點 $T$ ，從 $S$ 出發走到 $T$ 的最長距離是多少？</p>
+						</section>
+						<section>
+							<h2>觀察</h2>
+							<ul>
+								<li class="fragment">沒有環</li>
+								<li class="fragment">若 $T'$ 是走到 $T$ 所經過的某個點</li>
+								<li class="fragment">$T$ 不可能走到 $T'$</li>
+								<li class="fragment">最佳子結構</li>
+								<li class="fragment">重複子問題</li>
+							</ul>
+						</section>
+						<section>
+							<h1>DP  <font style="color:red;font-size:50%;padding:20px"> vs. </font>  DAG</h1>
+						</section>
+					</section>
+					<section>
+						<section>
+							<h2>狀態以及轉移方程</h2>
+						</section>
+						<section>
+							<h2>定義</h2>
+							<ul>
+								<li class="fragment">狀態：小問題</li>
+								<li class="fragment">轉移方程：問題間的相依關係</li>
+							</ul>
+						</section>
+						<section>
+							<h2>DAG上的類比</h2>
+							<ul>
+								<li class="fragment">狀態：結點</li>
+								<li class="fragment">轉移方程：有向邊</li>
+							</ul>
+						</section>
+						<section>
+							<h2>解題流程</h2>
+							<ul>
+								<li class="fragment">分析題目，設計合適的狀態</li>
+								<li class="fragment">訂定有效率的轉移方程，注意邊界條件</li>
+							</ul>
+						</section>
+						<section>
+							<h2>$x\mathbf{D}/y\mathbf{D}$ 表示法</h2>
+							<ul>
+								<li class="fragment">狀態複雜度：$O(N^x)$</li>
+								<li class="fragment">轉移複雜度：$O(N^y)$</li>
+								<li class="fragment">總複雜度：$O(N^{x+y})$</li>
+							</ul>
+						</section>
+						<section>
+							<h2>例題：書櫃(Bookshelf)</h2>
+							<p style="text-align:left">給定一個寬度固定為 $L$ 的多層書櫃，以及 $N \leq 100000$ 本書，其中編號 $i$ 的書本的寬度及高度分別為 $W(i)$ 和 $H(i)$ 。
+								現在要將這 $N$ 本書依序擺進書櫃中，而且須滿足下列條件：</p>
+								<ul>
+									<li>每一層中的書本編號必須是連續的</li>
+									<li>每一層的書本寬度總和不能超過 $L$ </li>
+								</ul>
+								<p style="text-align:left">而每一層的高度為那一層當中高度最大的書本的高度。請問：這個書櫃的總高度最少多少？</p>
+							</section>
+							<section>
+								<h2>觀察</h2>
+								<ul>
+									<li class="fragment">把最前面（最後面）若干本書放在同一層</li>
+									<li class="fragment">剩餘的「最佳化問題」仍然一樣</li>
+								</ul>
+							</section>
+							<section>
+								<h2>狀態</h2>
+								<p>$dp[i]$：前 $i$ 本書所需最小高度</p><br/>
+								<h2 class="fragment">轉移方程</h2>
+								<p class="fragment">$dp[ i ] = \displaystyle\min_{ \substack{ 1 \leq j + 1 \leq i \\ \sum_{n=j+1}^{i} W(n) \leq L }} \Big( dp[ j ] + \displaystyle\max_{j+1 \leq n \leq i} H(n) \Big)$</p>
+							</section>
+							<section>
+								<h2>複雜度：$1\mathbf{D}/2\mathbf{D}$</h2>
+								<ul>
+									<li class="fragment">狀態複雜度：$O(N)$</li>
+									<li class="fragment">轉移複雜度：$O(N^2)$</li>
+									<li class="fragment">總複雜度：$O(N^3)$</li>
+								</ul>
+							</section>
+							<section>
+								<h2>邊界條件：</h2>
+								<p class="fragment">$dp[0]=0$</p>
+							</section>
+							<section>
+								<h2>實作</h2>
+								<pre><code class="cpp" data-trim contenteditable>int n , L ;
+int H[ MAXLEN + 5 ] , W[ MAXLEN + 5 ] ;
+int dp[ MAXLEN + 5 ] ;
+int solve() {
+  dp[ 0 ] = 0 ;
+  for ( int i = 1 ; i <= n ; i ++ ) {
+    dp[ i ] = INF ; // INF: any value large enough
+    for ( int j = 0 ; j < i ; j ++ ) {
+      int widsum = 0 , maxhgt = 0 ;
+      for ( int k = j + 1 ; k <= i ; k ++ )
+        widsum += W[ k ] , maxhgt = max( maxhgt , H[ k ] ) ;
+      if ( widsum > L ) continue ;
+      else dp[ i ] = min( dp[ i ] , dp[ j ] + maxhgt ) ;
+    }
+  }
+  return dp[ n ] ;
+}
+</code></pre>
+
+							</section>
+						</section>
+						<section>
+							<section>
+								<h2>該如何實作？</h2>
+								<h2>Top-down vs. Bottom-up</h2>
+							</section>
+							<section>
+								<h2>概念</h2>
+								<ul>
+									<li class="fragment">Top-down：由上而下，由大而小</li>
+									<li class="fragment">Bottom-up：由下而上，由小而大</li>
+								</ul>
+							</section>
+							<section>
+								<h2>例題回顧：DAG上的最長路徑</h2>
+								<pre><code data-trim contenteditable>int n , m ; // n nodes, m edges
+struct edge { int from , weight ; } ; // edge structure
+vector< edge > v[ MAXN + 1 ] ;
+  // v[ i ] stores all edges that points to node i
+</code></pre>
+							</section>
+							<section>
+								<h2>Top-down</h2>
+								<pre><code data-trim contenteditable>void solve( int idx ) {
+  if ( dp[ idx ] != -1 ) return dp[ idx ] ;
+  for ( edge ed : v[ idx ] )
+    dp[ idx ] = max( dp[ idx ] , solve( ed.from ) + ed.weight ) ;
+  return dp[ idx ] ;
+}
+fill( dp + 1 , dp + n + 1 , -1 ) ;
+dp[ 1 ] = 0 ;
+for ( int i = 1 ; i <= n ; i ++ ) if ( dp[ i ] == -1 )
+  solve( i ) ;
+</code></pre>
+
+							</section>
+							<section>
+								<h2>優點</h2>
+								<p>直觀、減低編程複雜度、狀態複雜時完勝</p><br/>
+								<h2 class="fragment">缺點</h2>
+								<p class="fragment">遞迴實作、stack overflow、效率較差</p>
+							</section>
+							<section>
+								<h2>Bottom-up</h2>
+								<pre><code data-trim contenteditable>dp[ 1 ] = 0 ;
+for ( int i = 1 ; i <= n ; i ++ ) {
+  int idx = tp[ i ] ;
+  dp[ idx ] = -1 ;
+  for ( edge ed : v[ idx ] )
+    dp[ idx ] = max( dp[ idx ] , solve( ed.from ) + ed.weight ) ;
+}
+</code></pre>
+							</section>
+							<section>
+								<h2>優點</h2>
+								<p>效率較佳、程式碼較短</p><br/>
+								<h2 class="fragment">缺點</h2>
+								<p class="fragment">需有<font style="color:red">拓樸序</font>、狀態複雜時難以實作</p>
+							</section>
+							<section>
+								<h2>計數問題？</h2>
+								<ul>
+									<li class="fragment">和「最佳化問題」類似</li>
+									<li class="fragment">一些數學</li>
+									<li class="fragment">排列組合、排容原理$\ldots$</li>
+								</ul>
+							</section>
+						</section>
+						<section>
+							<section>
+								<h2>常見小技巧</h2>
+								<ul>
+									<li>預處理</li>
+									<li>輸出解答</li>
+									<li>滾動陣列</li>
+								</ul>
+							</section>
+							<section>
+								<h2>例題回顧：書櫃(Bookshelf)</h2>
+							</section>
+							<section>
+								<h2>狀態</h2>
+								<p>$dp[i]$：前 $i$ 本書所需最小高度</p><br/>
+								<h2>轉移方程</h2>
+								<p>$dp[ i ] = \displaystyle\min_{ \substack{ 1 \leq j + 1 \leq i \\ \sum_{n=j+1}^{i} W(n) \leq L }} \Big( dp[ j ] + \displaystyle\max_{j+1 \leq n \leq i} H(n) \Big)$</p>
+							</section>
+							<section>
+								<p><font style="color:red">$\sum_{n=j+1}^{i} W(n)$</font> 和 <font style="color:red">$\displaystyle\max_{j+1 \leq n \leq i} H(n)$</font> 花了 $O(N^3)$</p><br/>
+								<p>其實他們之間也有相依關係</p>
+							</section>
+							<section>
+								<p>$$\sum_{n=j+1}^{i} W(n) = \sum_{n=j+1}^{i-1} W(n) + W(i)$$</p>
+								<p>$$\displaystyle\max_{j+1 \leq n \leq i} H(n) = \max \Big\{ \displaystyle\max_{j+1 \leq n \leq i-1} H(n) , \,H(i) \Big\}$$
+								</section>
+								<section>
+									<h2>$O(N^2)$預處理（多一層DP）</h2>
+									<h2>$\downarrow$</h2>
+									<h2>$O(1)$查詢</h2>
+								</section>
+								<section>
+									<h2>前綴的厲害</h2>
+								</section>
+								<section>
+									<h2>例題：完美比例(GCJ 2015)</h2>
+									<p style="text-align:left">給一個長度 $N \leq 500000$ 的0/1序列，和一個比例 $f$ ($0\leq f \leq 1$)。請給出一個子區間所形成的序列，使得當中的 $1$ 所佔的比例越接近 $f$ 越好。</p>
+								</section>
+								<section>
+									<h2>觀察</h2>
+									<ul>
+										<li class="fragment">區間 $[i,j]$ 中 $1$ 所佔的比例與 $f$ 的差為 $\lvert \frac{ones(i,j)}{length(i,j)} - f\rvert$</li>
+										<li class="fragment">同乘長度後 $\Rightarrow \lvert ones(i,j) - length(i,j) \times f\rvert$</li>
+										<li class="fragment">可表示為兩個前綴 $ones(1,i) - length(1,i) \times f\rvert$ 的差的絕對值</li>
+										<li class="fragment">$\ldots\ldots$</li>
+										<li class="fragment">$O(N \log N)$</li>
+									</ul>
+								</section>
+								<section>
+									<h2>輸出解答</h2>
+								</section>
+								<section>
+									<h2>處理方法</h2>
+									<ul>
+										<li class="fragment" style="font-weight:bold">「記錄轉移的來源」</li>
+										<li class="fragment">從答案回溯出整個決策過程</li>
+									</ul>
+								</section>
+								<section>
+									<h2>But...</h2>
+									<ul>
+										<li class="fragment">這種題目通常不簡單</li>
+										<li class="fragment">因為DP過程中常常為了滿足時間或空間的要求而捨棄某些資訊</li>
+										<li class="fragment">其他方法：分治...</li>
+									</ul>
+								</section>
+								<section>
+									<h2>滾動陣列</h2>
+									<p>省空間以及提升執行效率的小技巧</p>
+								</section>
+								<section>
+									<h2>使用時機</h2>
+									<p>在多維度的動態規劃問題中，<br/>某一個維度上的轉移只跟它之前的特定幾項有關係時</p>
+								</section>
+								<section>
+									<h2>例題：最長共同子序列</h2>
+									<p style="text-align:left">給定兩個序列 $\mathcal{A} = (a_1, \ldots , a_n)$ 及 $\mathcal{B} = (b_1, \ldots , b_m)$，問最長的共同子序列 (在 $\mathcal{A}$ 和 $\mathcal{B}$ 中都有出現的子序列) 為何。請輸出該最長共同子序列 (LCS) 的長度。</p>
+								</section>
+								<section>
+									<h2>狀態</h2>
+									<p>$dp[i][j]$：$(a_1, \ldots , a_i)$ 和 $(b_1, \ldots , b_j)$ 的 LCS 長度</p><br/>
+									<h2 class="fragment">轉移方程</h2>
+									<p class="fragment">$dp[ i ][ j ] = \begin{cases} 
+										dp[ i - 1 ][ j - 1 ] + 1 & \text{if } a_i = b_j \\
+										\displaystyle\max \big\{ dp[ i - 1 ][ j ] , dp[ i ][ j - 1 ] \big\} & \text{otherwise} 
+										\end{cases}$</p>
+									</section>
+									<section>
+										<h2>優點</h2>
+										<ul>
+											<li class="fragment">只需保留最後兩列的答案</li>
+											<li class="fragment">空間複雜度 $O(NM) \rightarrow O(N)$</li>
+											<li class="fragment">執行效率可能因為 locality 而提升</li>
+										</ul>
+										<br/> <br/>
+										<h2 class="fragment">缺點</h2>
+										<p class="fragment">捨棄先前的資訊，無法輸出解答...</p>
+									</section>
+								</section>
+								<section>
+									<section>
+										<h2>單調性優化</h2>
+									</section>
+									<section>
+										<h2>例題：有長度限制的最大連續和</h2>
+										<p style="text-align:left">給定一個長度 $N$ ($1 \leq N \leq 10^6$) 的數列 $A = (a_1, a_2, \ldots , a_N)$ ，求所有長度介於 $[l,r]$ ($1 \leq l \leq r \leq N$) 之間的區間總和中的最大值。</p>
+									</section>
+									<section>
+										<h2>狀態</h2>
+										<p>$dp[i]$：以第 $i$ 項結尾的區間和最大值</p><br/>
+										<h2 class="fragment">轉移方程</h2>
+										<p class="fragment">$dp[ i ] = \displaystyle\max_{ \substack{ 1 \leq j \leq i \\ l \leq i-j+1 \leq r }} \Big( p[ i ] - p[ j - 1 ] \Big) = p[ i ] - \displaystyle\min_{ \substack{ 1 \leq j \leq i \\ l \leq i-j+1 \leq r }} p[ j - 1 ]$</p>
+									</section>
+									<section>
+										<h2>每一個獨立做</h2>
+										<h2>$\downarrow$</h2>
+										<h2>$O(N^2)$</h2>
+									</section>
+									<section>
+										<h2>之間的關聯</h2>
+										<p>$N=20$, $l=3$, $r=11$</p>
+										<img src="./images/a-figure0.png"></img>
+									</section>
+									<section>
+										<h2>單調性</h2>
+										<ul>
+											<li class="fragment">較晚加入的候選人一定較晚走</li>
+											<li class="fragment">新加入的若比某個已經在的 $T$ 小</li>
+											<li class="fragment">$T$ 永遠不會是最小<font class="fragment" style="color:red">（捨棄）</font></li>
+										</ul>
+									</section>
+									<section>
+										<h2>單調性</h2>
+										<ul>
+											<li class="fragment"><font style="color:red">遞增</font>的候選人序列</li>
+											<li class="fragment">最小值一定在序列開頭</li>
+											<li class="fragment">均攤複雜度：$O(1)$轉移</li>
+										</ul>
+									</section>
+									<section>
+										<h2>實作(deque)</h2>
+										<pre><code class="c++" data-trim contenteditable>int n , l , r ;
+int p[ MAXN + 5 ] ; // preprocessed prefix-sum
+int dp[ MAXN + 5 ] ;
+int ans ; // stores the final answer
+typedef pair< int , int > ii ;
+deque< ii > dq ;
+
+if ( l == 1 ) dq.emplace_back( 0 , 0 ) ;
+for ( int i = 1 ; i <= n ; i ++ ) {
+  while ( dq.size() && i - dq.front().second >= r )
+    dq.pop_front() ;
+  if ( dq.size() ) dp[ i ] = p[ i ] - dq.front().first ;
+  else dp[ i ] = -1 ; // no valid interval
+
+  if ( i - l + 1 >= 0 ) {
+    while ( dq.size() && dq.back().first >= p[ i - l + 1 ] )
+      dq.pop_back() ;
+    dq.emplace_back( p[ i - l + 1 ] , i - l + 2 ) ;
+  }
+  if ( dp[ i ] != -1 ) ans = max( ans , dp[ i ] ) ;
+}
+</code></pre>
+
+
+							</section>
+							<section>
+								<h2>我們做了什麼？</h2>
+							</section>
+							<section>
+								<h2>凹/凸單調性</h2>
+								<img src="images/a-figure1.png" style="float:left;margin-left:10%"></img>
+								<p style="text-align:right"><br/>凹單調(concave totally monotone)：
+									$$a\leq b \Rightarrow c\leq d$$
+
+									凸單調(convex totally monotone)：
+									$$a\geq b \Rightarrow c\geq d$$</p>
+								</section>
+								<section>
+									<h2>Monge condition</h2>
+									<p>給一個$m \times n$ 矩陣 $B$，若 $\forall 1\leq i \le m, 1\leq j \le n$我們有：
+										<br/><br/>
+										$$B[i][j]+B[i+1][j+1] \;\;\leq (\geq)\;\; B[i][j+1]+B[i+1][j]$$<br/>
+										那我們說他符合 convex (concave) Monge condition.</p>
+									</section>
+									<section>
+										<h2>凸包優化</h2>
+									</section>
+									<section>
+										<h2>例題：Commando</h2>
+										<p style="text-align:left">給一個長度 $N$ ($N\leq 10^6$) 的數列 $\mathcal{A} = (a_1, a_2, \ldots , a_N )$ , $1\leq a_i \leq 100$ ，
+											現在要把這個數列切成任意多個連續的數列。對於每一個切出的數列，假設其總和為 $x$ ，便會得到 $a\cdot x^2 + b\cdot x + c$ ($-5 \leq a \leq -1 ,\, \lvert b \rvert, \lvert c \rvert \leq 10^7 $) 分。問最多可以得到幾分？</p>
+										</section>
+										<section>
+											<h2>狀態</h2>
+											<p>$dp[i]$：數列中前 $i$ 項最多可以得到的分數</p><br/>
+											<h2 class="fragment">轉移方程</h2>
+											<p class="fragment">$dp[i] = \displaystyle\max_{0 \leq j \le i} \Big\{ dp[ j ] + a \cdot ( \displaystyle\sum_{k=j+1}^{i}a[k] )^2 + b \cdot ( \displaystyle\sum_{k=j+1}^{i}a[k] ) + c \Big\}$</p>
+										</section>
+										<section>
+											<h2>進一步化簡</h2>
+											<p>$\begin{aligned}
+												dp[ i ] &= \displaystyle\max_{0 \leq j \le i} \Big\{ dp[ j ] + a \cdot ( p[ i ] - p[ j ] )^2 + b \cdot ( p[ i ] - p[ j ] ) + c \Big\} \\
+												&= a\cdot p[i]^2 + b\cdot p[ i ] + c + \\
+												& \quad \displaystyle\max_{0 \leq j \le i} \Big\{ (dp[ j ] + a \cdot p[ j ]^2 - b \cdot p[ j ]) - 2a \cdot p[j] \cdot p[i] \Big\}
+												\end{aligned}$</p>
+											</section>
+											<section>
+												<h2>$t(i) + f(j) + g(i)\cdot h(j)$</h2>
+												<ul>
+													<li class="fragment" data-fragment-index="1">$t(i)$：$a\cdot p[i]^2 + b\cdot p[ i ] + c$</li>
+													<li class="fragment" data-fragment-index="2">$f(j)$：$dp[ j ] + a \cdot p[ j ]^2 - b \cdot p[ j ]$</li>
+													<li class="fragment" data-fragment-index="3">$g(i)$：$p[ i ]$ <font style="color:red" class="fragment" data-fragment-index="5">$\rightarrow$遞增</font></li>
+													<li class="fragment" data-fragment-index="4">$h(j)$：$-2a\cdot p[j]$<font style="color:red" class="fragment" data-fragment-index="6">$\rightarrow$遞增</font></li>
+												</ul>
+											</section>
+											<section>
+												<h2>加入新線</h2>
+												<img src="images/convex1.png"></img>
+											</section>
+											<section>
+												<h2>加入新線</h2>
+												<img src="images/convex2.png"></img>
+											</section>
+											<section>
+												<h2>查詢</h2>
+												<img src="images/convex3.png"></img>
+											</section>
+											<section>
+												<h2>實作</h2>
+												<pre><code class="c++" data-trim contenteditable>typedef long long ll ;
+struct line {
+  ll slope , inter ;
+  ll value( ll x ) { return x * slope + inter ; }
+};
+deque< line > dq ;
+int n;
+ll a , b , c ;
+ll p[ MAXN + 5 ]; // preprocessed prefix-sum
+ll dp[ MAXN + 5 ];
+bool check(line x,line y,line z) {
+  return ( z.slope - y.slope ) * ( z.inter - x.inter )
+    <= ( z.slope - x.slope ) * ( z.inter - y.inter ) ;
+}
+</code></pre>
+
+									</section>
+									<section>
+										<h2>實作</h2>
+										<pre><code class="c++" data-trim contenteditable>int main() {
+  dq.push_back( (line){ 0 , 0 } ) ;
+  for ( int i = 1 ; i <= n ; i ++ ) {
+    while ( dq.size() >= 2 && dq[ 0 ].value( g( i ) )
+        < dq[ 1 ].value( g( i ) ) )
+      dq.pop_front() ;
+    dp[ i ] = dq[ 0 ].value( g( i ) ) + t( i ) ;
+    line newline{ h( i ) , f( i ) } ;
+    while ( dq.size() >= 2 &&
+        check( dq[ dq.size() - 2 ] , dq[ dq.size() - 1 ] , newline ) )
+      dq.pop_back() ;
+    dq.push_back( newline ) ;
+  }
+}
+</code></pre>
+
+
+							</section>
+							<section>
+								<h2>時間複雜度</h2>
+								<p>$O(N^2) \rightarrow O(N)$</p>
+							</section>
+							<section>
+								<h2>沒單調性怎麼辦？</h2>
+							</section>
+							<section>
+								<h2>例題：Machine Works</h2>
+								<p style="text-align:left">有 $N$ 台生產機器，分別在第 $t_i$ 天會被拍賣。
+									機器只能在被拍賣的那天被買走，過了那天之後機器就會下架，之後再也買不到。
+
+									每台機器有它的購買價格 $p_i$ 與轉售價格 $r_i$ $(r_i\leq p_i)$：
+									在拍賣那天你可以用 $p_i$ 元買下它，之後任何時候你可以用 $r_i$ 元的價格轉賣它。
+									除此以外每台機器有其賺錢效率 $g_i$：當你擁有該機器時，每天可以賺進 $g_i$ 元。
+
+									一開始你有 $B$ 元的本金，且你一次只能擁有一台機器。
+									問在 $T$ 天之後透過買進機器工作(以及賣出機器)，你最多可以賺多少錢？
+
+									$(1\leq N\leq 10^5,\,1\leq r_i,p_i,g_i,B,T \leq 10^9,\,1\leq t_i \leq T)$</p>
+								</section>
+								<section>
+									<h2>狀態</h2>
+									<p>$dp[i]$：買了第 $i$ 台機器後的當下，若賣掉手頭上的機器，你最多已經賺了多少錢</p><br/>
+									<h2 class="fragment">轉移方程</h2>
+									<p class="fragment">$\begin{aligned}
+										dp[i] = \max_{j} \{ & dp[j]+g_j\cdot (t_i-t_j)-p_i+r_i \\
+										& \mid dp[j]+g_j\cdot(t_i-t_j)\geq p_i \}
+										\end{aligned}$</p>
+									</section>
+									<section>
+										<h2>單調性？</h2>
+										<ul>
+											<li class="fragment" data-fragment-index="1">$g_j$ （斜率）沒有單調性</li>
+											<li class="fragment" data-fragment-index="2">一旦某台賺錢效率較高的機器 $A$ 在某個時間點</li>
+											<li class="fragment" data-fragment-index="3">賺的錢贏過另一台賺錢效率較低的機器 $B$ $\rightarrow$ 捨棄 $B$</li>
+											<li class="fragment" data-fragment-index="4"><font style="color:red">凸包</font>本身的單調性</li>
+										</ul>
+									</section>
+									<section>
+										<h2>在凸包上用<font style="color:red">斜率</font>二分搜</h2>
+									</section>
+									<section>
+										<h2>加入新線</h2>
+										<img src="images/convex4.png"></img>
+									</section>
+									<section>
+										<h2>加入新線</h2>
+										<img src="images/convex5.png"></img>
+									</section>
+									<section>
+										<h2>查詢</h2>
+										<img src="images/convex6.png"></img>
+									</section>
+									<section>
+										<h2>時間複雜度</h2>
+										<p>$O(N^2) \rightarrow O(N \log N)$</p>
+									</section>
+									<section>
+										<h2>$2\mathbf{D}/1\mathbf{D}$ 優化</h2>
+										<ul>
+											<li class="fragment" data-fragment-index="1">利用 Monge condition</li>
+											<li class="fragment" data-fragment-index="2">決策點的單調性</li>
+											<li class="fragment" data-fragment-index="3">$O(N^3) \rightarrow O(N^2)$</li>
+										</ul>
+									</section>
+									<section>
+										<h2>例題回顧：書櫃(Bookshelf)</h2>
+										<ul>
+											<li class="fragment" data-fragment-index="1">$O(N^2) \rightarrow $ TLE</li>
+											<li class="fragment" data-fragment-index="2">可以優化到 $O(N \log N)$嗎？</li>
+										</ul>
+									</section>
+									<section>
+										<h2>小結</h2>
+										<ul>
+											<li class="fragment" data-fragment-index="1">單調性無所不在</li>
+											<li class="fragment" data-fragment-index="2">從小性質著手</li>
+											<li class="fragment" data-fragment-index="3">有志者，事竟成？</li>
+										</ul>
+									</section>
+								</section>
+								<section>
+									<section>
+										<h2>總結</h2>
+										<ul>
+											<li>動態規劃入門</li>
+											<li>狀態以及轉移方程</li>
+											<li>Top-down vs. Bottom-up</li>
+											<li>常見小技巧</li>
+											<li>單調性優化</li>
+										</ul>
+									</section>
+									<section>
+										<h1>謝謝大家</h1>
+									</section>
+								</section>
+							</div>
+						</div>
+
+						<script src="lib/js/head.min.js"></script>
+						<script src="js/reveal.js"></script>
+
+						<script>
+
+	  // Full list of configuration options available at:
+	// https://github.com/hakimel/reveal.js#configuration
+	
+	
+
+
+</script>
+
+</body>
+</html>

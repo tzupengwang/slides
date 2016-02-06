@@ -1,0 +1,15 @@
+<pre><code class="c++" data-trim contenteditable>typedef long long ll ;
+struct line {
+  ll slope , inter ;
+  ll value( ll x ) { return x * slope + inter ; }
+};
+deque< line > dq ;
+int n;
+ll a , b , c ;
+ll p[ MAXN + 5 ]; // preprocessed prefix-sum
+ll dp[ MAXN + 5 ];
+bool check(line x,line y,line z) {
+  return ( z.slope - y.slope ) * ( z.inter - x.inter )
+    <= ( z.slope - x.slope ) * ( z.inter - y.inter ) ;
+}
+</code></pre>

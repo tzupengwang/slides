@@ -1,0 +1,8 @@
+<pre><code data-trim contenteditable>dp[ 1 ] = 0 ;
+for ( int i = 1 ; i <= n ; i ++ ) {
+  int idx = tp[ i ] ;
+  dp[ idx ] = -1 ;
+  for ( edge ed : v[ idx ] )
+    dp[ idx ] = max( dp[ idx ] , solve( ed.from ) + ed.weight ) ;
+}
+</code></pre>

@@ -1,0 +1,18 @@
+<pre><code class="cpp" data-trim contenteditable>int n , L ;
+int H[ MAXLEN + 5 ] , W[ MAXLEN + 5 ] ;
+int dp[ MAXLEN + 5 ] ;
+int solve() {
+  dp[ 0 ] = 0 ;
+  for ( int i = 1 ; i <= n ; i ++ ) {
+    dp[ i ] = INF ; // INF: any value large enough
+    for ( int j = 0 ; j < i ; j ++ ) {
+      int widsum = 0 , maxhgt = 0 ;
+      for ( int k = j + 1 ; k <= i ; k ++ )
+        widsum += W[ k ] , maxhgt = max( maxhgt , H[ k ] ) ;
+      if ( widsum > L ) continue ;
+      else dp[ i ] = min( dp[ i ] , dp[ j ] + maxhgt ) ;
+    }
+  }
+  return dp[ n ] ;
+}
+</code></pre>

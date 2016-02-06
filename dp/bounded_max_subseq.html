@@ -1,0 +1,22 @@
+<pre><code class="c++" data-trim contenteditable>int n , l , r ;
+int p[ MAXN + 5 ] ; // preprocessed prefix-sum
+int dp[ MAXN + 5 ] ;
+int ans ; // stores the final answer
+typedef pair< int , int > ii ;
+deque< ii > dq ;
+
+if ( l == 1 ) dq.emplace_back( 0 , 0 ) ;
+for ( int i = 1 ; i <= n ; i ++ ) {
+  while ( dq.size() && i - dq.front().second >= r )
+    dq.pop_front() ;
+  if ( dq.size() ) dp[ i ] = p[ i ] - dq.front().first ;
+  else dp[ i ] = -1 ; // no valid interval
+
+  if ( i - l + 1 >= 0 ) {
+    while ( dq.size() && dq.back().first >= p[ i - l + 1 ] )
+      dq.pop_back() ;
+    dq.emplace_back( p[ i - l + 1 ] , i - l + 2 ) ;
+  }
+  if ( dp[ i ] != -1 ) ans = max( ans , dp[ i ] ) ;
+}
+</code></pre>

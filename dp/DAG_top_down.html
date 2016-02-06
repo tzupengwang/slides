@@ -1,0 +1,11 @@
+<pre><code data-trim contenteditable>void solve( int idx ) {
+  if ( dp[ idx ] != -1 ) return dp[ idx ] ;
+  for ( edge ed : v[ idx ] )
+    dp[ idx ] = max( dp[ idx ] , solve( ed.from ) + ed.weight ) ;
+  return dp[ idx ] ;
+}
+fill( dp + 1 , dp + n + 1 , -1 ) ;
+dp[ 1 ] = 0 ;
+for ( int i = 1 ; i <= n ; i ++ ) if ( dp[ i ] == -1 )
+  solve( i ) ;
+</code></pre>
